@@ -3,8 +3,10 @@ class PostsController < ApplicationController
 
 
   def index
-    @posts = Post.all
-    @new_posts = Post.all
+    @q = Post.order(created_at: :desc).ransack(params[:q])
+    @posts = @q.result.page(params[:page]).per(2)
+
+    @new_posts = Post.find_newest_article
     @author = Author.first
   end
 
@@ -18,7 +20,7 @@ class PostsController < ApplicationController
   def create
     @post = Post.new(post_params)
     @post.save
-    redirect_to "/posts/#{@post.id}" # post_path(@post)でもOK
+    redirect_to @post # post_path(@post)でもOK
   end
 
   def edit
@@ -26,7 +28,7 @@ class PostsController < ApplicationController
 
   def update
     @post.update(post_params)
-    redirect_to "/posts/#{@post.id}"
+    redirect_to @post
   end
 
   def destroy
